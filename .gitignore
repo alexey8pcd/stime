@@ -1,0 +1,7 @@
+/.gradle
+/.idea
+/build
+/nbproject
+/gradle/wrapper
+/gradlew
+/gradlew.bat

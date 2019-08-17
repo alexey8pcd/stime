@@ -1,0 +1,16 @@
+apply plugin: 'java'
+
+compileJava.options.encoding = 'UTF-8'
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Simple Time Tracker',
+                'Implementation-Version': '1.0.0',
+                'Main-Class': 'ru.alejov.util.stime.MainForm'
+    }
+}
+
+
+repositories {
+    mavenCentral()
+}
