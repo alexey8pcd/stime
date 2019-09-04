@@ -53,8 +53,8 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     private static Date toDate(long diffInMillis) {
-        int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(diffInMillis);
-        int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(diffInMillis);
+        int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(diffInMillis) % 60;
+        int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(diffInMillis) % 60;
         int hours = (int) TimeUnit.MILLISECONDS.toHours(diffInMillis);
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hours);
