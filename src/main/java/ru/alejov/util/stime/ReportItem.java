@@ -1,5 +1,8 @@
 package ru.alejov.util.stime;
 
+/**
+ * @author Ovcharov Alexey
+ */
 class ReportItem {
 
     private final TrackItem trackItem;

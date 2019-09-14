@@ -1,16 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ru.alejov.util.stime;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -26,7 +18,6 @@ public class ReportForm extends javax.swing.JDialog {
     public ReportForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        init0();
         AbstractTableModel abstractTableModel = new AbstractTableModel() {
             @Override
             public int getRowCount() {
@@ -43,10 +34,10 @@ public class ReportForm extends javax.swing.JDialog {
                 return data.get(rowIndex).get(columnIndex);
             }
         };
-        jTable1.setModel(abstractTableModel);
-        jTable1.getTableHeader().getColumnModel().getColumn(0).setHeaderValue("Task");
-        jTable1.getTableHeader().getColumnModel().getColumn(1).setHeaderValue("Description");
-        jTable1.getTableHeader().getColumnModel().getColumn(2).setHeaderValue("Time");
+        tableReport.setModel(abstractTableModel);
+        tableReport.getTableHeader().getColumnModel().getColumn(0).setHeaderValue("Task");
+        tableReport.getTableHeader().getColumnModel().getColumn(1).setHeaderValue("Description");
+        tableReport.getTableHeader().getColumnModel().getColumn(2).setHeaderValue("Time");
     }
 
     void setRep(List<List<String>> data) {
@@ -62,13 +53,13 @@ public class ReportForm extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        scrollPaneReport = new javax.swing.JScrollPane();
+        tableReport = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(800, 600));
+        setPreferredSize(new java.awt.Dimension(800, 400));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tableReport.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -91,20 +82,17 @@ public class ReportForm extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTable1);
+        scrollPaneReport.setViewportView(tableReport);
 
-        getContentPane().add(jScrollPane1, java.awt.BorderLayout.CENTER);
+        getContentPane().add(scrollPaneReport, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JScrollPane scrollPaneReport;
+    private javax.swing.JTable tableReport;
     // End of variables declaration//GEN-END:variables
 
-    private void init0() {
-        setLocationRelativeTo(null);
-    }
 }

@@ -3,8 +3,12 @@ package ru.alejov.util.stime;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
+/**
+ * @author Ovcharov Alexey
+ */
 class TrackItem {
 
     private static final String SP = "\t`";
@@ -66,5 +70,38 @@ class TrackItem {
     String getDescription() {
         return description;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 19 * hash + Objects.hashCode(this.trackId);
+        hash = 19 * hash + Objects.hashCode(this.date);
+        hash = 19 * hash + Objects.hashCode(this.description);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TrackItem other = (TrackItem) obj;
+        if (!Objects.equals(this.trackId, other.trackId)) {
+            return false;
+        }
+        if (!Objects.equals(this.description, other.description)) {
+            return false;
+        }
+        if (!Objects.equals(this.date, other.date)) {
+            return false;
+        }
+        return true;
+    }    
 
 }
