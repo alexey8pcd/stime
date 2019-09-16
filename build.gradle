@@ -1,6 +1,8 @@
 apply plugin: 'java'
 
 compileJava.options.encoding = 'UTF-8'
+compileJava.sourceCompatibility = JavaVersion.VERSION_1_8;
+compileJava.targetCompatibility = JavaVersion.VERSION_1_8;
 
 jar {
     manifest {

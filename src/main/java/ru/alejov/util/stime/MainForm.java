@@ -462,7 +462,7 @@ public class MainForm extends javax.swing.JFrame {
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        file = new File(dir, "sTime-track-" + currentDateAsString + ".cvs");
+        file = new File(dir, "sTime-track-" + currentDateAsString + ".csv");
         if (!file.exists()) {
             try {
                 file.createNewFile();
