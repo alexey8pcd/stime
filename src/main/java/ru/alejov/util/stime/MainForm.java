@@ -2,6 +2,7 @@ package ru.alejov.util.stime;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,13 +12,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.swing.*;
@@ -30,6 +25,7 @@ public class MainForm extends javax.swing.JFrame {
 
     private final transient List<TrackItem> tracks = new ArrayList<>();
     private final LocalDate today = LocalDate.now();
+    private final Set<String> lastTasks = new TreeSet<>();
     
     private LocalDate currentDay = today;
     private File file;
@@ -57,18 +53,19 @@ public class MainForm extends javax.swing.JFrame {
         menuItemEdit = new javax.swing.JMenuItem();
         menuItemDelete = new javax.swing.JMenuItem();
         labelTaskId = new javax.swing.JLabel();
-        textBoxTaskId = new javax.swing.JTextField();
-        buttonAddTrack = new javax.swing.JButton();
         scrollPaneTracks = new javax.swing.JScrollPane();
         listTracks = new javax.swing.JList<>();
         labelDescription = new javax.swing.JLabel();
-        textBoxDescription = new javax.swing.JTextField();
-        buttonReport = new javax.swing.JButton();
-        buttonEndDay = new javax.swing.JButton();
         labelCurrentDay = new javax.swing.JLabel();
-        buttonPause = new javax.swing.JButton();
         buttonPrevDay = new javax.swing.JButton();
         buttonNextDay = new javax.swing.JButton();
+        comboBoxDescription = new javax.swing.JComboBox<>();
+        comboBoxTaskId = new javax.swing.JComboBox<>();
+        panelButtons = new javax.swing.JPanel();
+        buttonAddTrack = new javax.swing.JButton();
+        buttonPause = new javax.swing.JButton();
+        buttonEndDay = new javax.swing.JButton();
+        buttonReport = new javax.swing.JButton();
 
         menuItemEdit.setText("Edit...");
         menuItemEdit.addActionListener(new java.awt.event.ActionListener() {
@@ -96,15 +93,6 @@ public class MainForm extends javax.swing.JFrame {
 
         labelTaskId.setText("TaskId");
 
-        buttonAddTrack.setBackground(new java.awt.Color(51, 255, 51));
-        buttonAddTrack.setText("Add track");
-        buttonAddTrack.setPreferredSize(new java.awt.Dimension(80, 24));
-        buttonAddTrack.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonAddTrackActionPerformed(evt);
-            }
-        });
-
         listTracks.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         listTracks.setComponentPopupMenu(popupMenuTracks);
         listTracks.setMaximumSize(new java.awt.Dimension(380, 0));
@@ -117,34 +105,8 @@ public class MainForm extends javax.swing.JFrame {
 
         labelDescription.setText("Description");
 
-        buttonReport.setText("Report");
-        buttonReport.setPreferredSize(new java.awt.Dimension(80, 24));
-        buttonReport.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonReportActionPerformed(evt);
-            }
-        });
-
-        buttonEndDay.setBackground(new java.awt.Color(255, 102, 102));
-        buttonEndDay.setText("End day");
-        buttonEndDay.setPreferredSize(new java.awt.Dimension(80, 24));
-        buttonEndDay.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonEndDayActionPerformed(evt);
-            }
-        });
-
         labelCurrentDay.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelCurrentDay.setText("Date: 01.01.2018");
-
-        buttonPause.setBackground(new java.awt.Color(255, 255, 51));
-        buttonPause.setText("Pause");
-        buttonPause.setPreferredSize(new java.awt.Dimension(80, 24));
-        buttonPause.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonPauseActionPerformed(evt);
-            }
-        });
 
         buttonPrevDay.setText("<");
         buttonPrevDay.addActionListener(new java.awt.event.ActionListener() {
@@ -160,37 +122,71 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
+        comboBoxDescription.setEditable(true);
+
+        comboBoxTaskId.setEditable(true);
+
+        buttonAddTrack.setBackground(new java.awt.Color(51, 255, 51));
+        buttonAddTrack.setText("Add track");
+        buttonAddTrack.setPreferredSize(new java.awt.Dimension(80, 24));
+        buttonAddTrack.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonAddTrackActionPerformed(evt);
+            }
+        });
+        panelButtons.add(buttonAddTrack);
+
+        buttonPause.setBackground(new java.awt.Color(255, 255, 51));
+        buttonPause.setText("Pause");
+        buttonPause.setPreferredSize(new java.awt.Dimension(80, 24));
+        buttonPause.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonPauseActionPerformed(evt);
+            }
+        });
+        panelButtons.add(buttonPause);
+
+        buttonEndDay.setBackground(new java.awt.Color(255, 102, 102));
+        buttonEndDay.setText("End day");
+        buttonEndDay.setPreferredSize(new java.awt.Dimension(80, 24));
+        buttonEndDay.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonEndDayActionPerformed(evt);
+            }
+        });
+        panelButtons.add(buttonEndDay);
+
+        buttonReport.setText("Report");
+        buttonReport.setPreferredSize(new java.awt.Dimension(80, 24));
+        buttonReport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonReportActionPerformed(evt);
+            }
+        });
+        panelButtons.add(buttonReport);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(textBoxTaskId)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(scrollPaneTracks)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(buttonAddTrack, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
-                                .addComponent(buttonEndDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(buttonPause, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(labelDescription)
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addComponent(buttonReport, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
+                    .addComponent(panelButtons, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 362, Short.MAX_VALUE)
+                    .addComponent(comboBoxTaskId, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(comboBoxDescription, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addComponent(labelDescription)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(labelTaskId)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(labelCurrentDay, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(buttonPrevDay)
                         .addGap(18, 18, 18)
-                        .addComponent(buttonNextDay))
-                    .addComponent(textBoxDescription))
+                        .addComponent(buttonNextDay)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -198,28 +194,22 @@ public class MainForm extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                 .addGap(17, 17, 17)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(labelCurrentDay, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(labelCurrentDay, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(labelTaskId)
                             .addComponent(buttonPrevDay)
                             .addComponent(buttonNextDay))
                         .addGap(10, 10, 10)
-                        .addComponent(textBoxTaskId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(labelDescription)
-                        .addGap(7, 7, 7)
-                        .addComponent(textBoxDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                            .addComponent(buttonAddTrack, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(buttonEndDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(buttonPause, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(buttonReport, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addComponent(scrollPaneTracks, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE)))
+                        .addComponent(comboBoxTaskId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
+                .addComponent(labelDescription)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(comboBoxDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(panelButtons, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(scrollPaneTracks, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -303,16 +293,17 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JButton buttonPause;
     private javax.swing.JButton buttonPrevDay;
     private javax.swing.JButton buttonReport;
+    private javax.swing.JComboBox<String> comboBoxDescription;
+    private javax.swing.JComboBox<String> comboBoxTaskId;
     private javax.swing.JLabel labelCurrentDay;
     private javax.swing.JLabel labelDescription;
     private javax.swing.JLabel labelTaskId;
     private javax.swing.JList<String> listTracks;
     private javax.swing.JMenuItem menuItemDelete;
     private javax.swing.JMenuItem menuItemEdit;
+    private javax.swing.JPanel panelButtons;
     private javax.swing.JPopupMenu popupMenuTracks;
     private javax.swing.JScrollPane scrollPaneTracks;
-    private javax.swing.JTextField textBoxDescription;
-    private javax.swing.JTextField textBoxTaskId;
     // End of variables declaration//GEN-END:variables
 
     private void prevDay() {
@@ -329,11 +320,27 @@ public class MainForm extends javax.swing.JFrame {
             }
             last = getLastTrackItem();
             if (!last.getTrackId().equals(newTrackId)) {
+                addToLastTask(newTrack);
                 tracks.add(newTrack);
                 persist();
+                updateTaskIdCombo();
             }
             listTracks.updateUI();
         }
+    }
+
+    private void addToLastTask(TrackItem newTrack) {
+            String taskId = newTrack.getTrackId();
+        if (!taskId.equalsIgnoreCase(Constants.BEGIN_DAY)
+                && !taskId.equalsIgnoreCase(Constants.END_DAY)
+                && !taskId.equalsIgnoreCase(Constants.PAUSE)) {
+            lastTasks.add(taskId);
+        }
+    }
+
+    private void updateTaskIdCombo() {
+        comboBoxTaskId.setModel(new DefaultComboBoxModel<>(lastTasks.toArray(new String[0])));
+        comboBoxTaskId.updateUI();
     }
 
     private TrackItem getLastTrackItem() {
@@ -444,6 +451,7 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     private void initSettings() {
+        fillDescriptionProperties();
         if (currentDay.isEqual(today)) {
             buttonAddTrack.setEnabled(true);
             buttonEndDay.setEnabled(true);
@@ -476,8 +484,11 @@ public class MainForm extends javax.swing.JFrame {
                 List<String> allLines = Files.readAllLines(path, StandardCharsets.UTF_8);
                 tracks.clear();
                 for (String string : allLines) {
-                    tracks.add(new TrackItem(string));
+                    TrackItem trackItem = new TrackItem(string);
+                    tracks.add(trackItem);
+                    addToLastTask(trackItem);
                 }
+                updateTaskIdCombo();
                 listTracks.updateUI();
             } catch (ParseException | IOException ex) {
                 ex.printStackTrace(System.err);
@@ -487,7 +498,7 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     private void onStart() {
-        String taskId = textBoxTaskId.getText();
+        String taskId = String.valueOf(comboBoxTaskId.getSelectedItem());
         if (taskId != null
                 && !taskId.isEmpty()
                 && !taskId.equalsIgnoreCase(Constants.BEGIN_DAY)
@@ -495,7 +506,7 @@ public class MainForm extends javax.swing.JFrame {
                 && !taskId.equalsIgnoreCase(Constants.PAUSE)
         ) {
             TrackItem trackItem = new TrackItem(taskId, new Date());
-            String desc = textBoxDescription.getText();
+            String desc = String.valueOf(comboBoxDescription.getSelectedItem());
             if (desc != null && !desc.isEmpty()) {
                 trackItem.setDescription(desc);
             }
@@ -545,6 +556,24 @@ public class MainForm extends javax.swing.JFrame {
             }
         } else {
             JOptionPane.showMessageDialog(this, "No items selected", "", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void fillDescriptionProperties() {
+        try (InputStream inputStream = getClass().getResourceAsStream("/activities.properties")) {
+            Properties properties = new Properties();
+            properties.load(inputStream);
+            Locale locale = Locale.getDefault();
+            String country = locale.getCountry();
+            List<String> propertiesList = new ArrayList<>();
+            for (Activity activity : Activity.values()) {
+                String name = activity.name();
+                String property = properties.getProperty((name + "." + country).toLowerCase(Locale.ENGLISH));
+                propertiesList.add(property);
+            }
+            comboBoxDescription.setModel(new DefaultComboBoxModel<>(propertiesList.toArray(new String[0])));
+        } catch (IOException ex) {
+            ex.printStackTrace(System.err);
         }
     }
 }
