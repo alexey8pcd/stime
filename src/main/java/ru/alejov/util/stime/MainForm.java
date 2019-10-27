@@ -565,10 +565,19 @@ public class MainForm extends javax.swing.JFrame {
             properties.load(inputStream);
             Locale locale = Locale.getDefault();
             String country = locale.getCountry();
+            String en = "en";
             List<String> propertiesList = new ArrayList<>();
             for (Activity activity : Activity.values()) {
                 String name = activity.name();
-                String property = properties.getProperty((name + "." + country).toLowerCase(Locale.ENGLISH));
+                String key = name + "." + country;
+                String keyLowercase = key.toLowerCase(Locale.ENGLISH);
+                String property = properties.getProperty(keyLowercase);
+                if (property == null || property.trim().isEmpty()) {
+                    String keyEn = name + "." + en;
+                    String keyLowercaseEn = keyEn.toLowerCase(Locale.ENGLISH);
+                    String propertyEn = properties.getProperty(keyLowercaseEn);
+                    propertiesList.add(propertyEn);
+                }
                 propertiesList.add(property);
             }
             comboBoxDescription.setModel(new DefaultComboBoxModel<>(propertiesList.toArray(new String[0])));
