@@ -2,7 +2,6 @@ package ru.alejov.util.stime;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +12,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.swing.*;
@@ -23,7 +23,17 @@ import javax.swing.*;
 @SuppressWarnings("serial")
 public class MainForm extends javax.swing.JFrame {
 
-    private final transient List<TrackItem> tracks = new ArrayList<>();
+    private static final String HELP_ABOUT_TEXT = ""
+            + "Simple Time Tracker (v. 2025.1)\n"
+            + "\n"
+            + "The program allows you to process labor costs for tasks:\n"
+            + "adding, editing, deleting records, creating a report.\n"
+            + "The data is stored in files in the user directory, in\n"
+            + "the 'sTimeTracks' subfolder. Each day - a separate file.\n"
+            + "\n"
+            + "Author: Alexey Ovcharov, e-mail: alexey8rus@mail.ru";
+    
+    private final transient List<TrackItem> tracks = new CopyOnWriteArrayList<>();
     private final LocalDate today = LocalDate.now();
     private final Set<String> lastTasks = new TreeSet<>();
     
@@ -40,7 +50,8 @@ public class MainForm extends javax.swing.JFrame {
 
             @Override
             public String getElementAt(int index) {
-                return tracks.get(index).toString();
+                TrackItem track = tracks.get(index);
+                return track.toString();
             }
         });
     }
@@ -52,20 +63,23 @@ public class MainForm extends javax.swing.JFrame {
         popupMenuTracks = new javax.swing.JPopupMenu();
         menuItemEdit = new javax.swing.JMenuItem();
         menuItemDelete = new javax.swing.JMenuItem();
-        labelTaskId = new javax.swing.JLabel();
-        scrollPaneTracks = new javax.swing.JScrollPane();
-        listTracks = new javax.swing.JList<>();
-        labelDescription = new javax.swing.JLabel();
+        panelTop = new javax.swing.JPanel();
+        panelTaskId = new javax.swing.JPanel();
         labelCurrentDay = new javax.swing.JLabel();
+        panelChangeDayButtons = new javax.swing.JPanel();
         buttonPrevDay = new javax.swing.JButton();
         buttonNextDay = new javax.swing.JButton();
-        comboBoxDescription = new javax.swing.JComboBox<>();
+        buttonHelp = new javax.swing.JButton();
+        panelEnterTask = new javax.swing.JPanel();
         comboBoxTaskId = new javax.swing.JComboBox<>();
+        labelTaskId = new javax.swing.JLabel();
         panelButtons = new javax.swing.JPanel();
         buttonAddTrack = new javax.swing.JButton();
         buttonPause = new javax.swing.JButton();
         buttonEndDay = new javax.swing.JButton();
         buttonReport = new javax.swing.JButton();
+        scrollPaneTracks = new javax.swing.JScrollPane();
+        listTracks = new javax.swing.JList<>();
 
         menuItemEdit.setText("Edit...");
         menuItemEdit.addActionListener(new java.awt.event.ActionListener() {
@@ -85,46 +99,69 @@ public class MainForm extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Simple Time Tracker");
+        setPreferredSize(new java.awt.Dimension(400, 400));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent evt) {
                 formWindowOpened(evt);
             }
         });
+        getContentPane().setLayout(new java.awt.BorderLayout(0, 5));
 
-        labelTaskId.setText("TaskId");
+        panelTop.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panelTop.setLayout(new java.awt.GridLayout(3, 1, 10, 10));
 
-        listTracks.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        listTracks.setComponentPopupMenu(popupMenuTracks);
-        listTracks.setMaximumSize(new java.awt.Dimension(380, 0));
-        listTracks.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                listTracksMousePressed(evt);
-            }
-        });
-        scrollPaneTracks.setViewportView(listTracks);
-
-        labelDescription.setText("Description");
+        panelTaskId.setLayout(new java.awt.GridLayout(1, 3, 20, 0));
 
         labelCurrentDay.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelCurrentDay.setText("Date: 01.01.2018");
+        panelTaskId.add(labelCurrentDay);
+
+        panelChangeDayButtons.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        panelChangeDayButtons.setLayout(new java.awt.GridLayout(1, 2, 10, 0));
 
         buttonPrevDay.setText("<");
+        buttonPrevDay.setToolTipText("Prev day");
         buttonPrevDay.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonPrevDayActionPerformed(evt);
             }
         });
+        panelChangeDayButtons.add(buttonPrevDay);
 
         buttonNextDay.setText(">");
+        buttonNextDay.setToolTipText("Next day");
         buttonNextDay.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonNextDayActionPerformed(evt);
             }
         });
+        panelChangeDayButtons.add(buttonNextDay);
 
-        comboBoxDescription.setEditable(true);
+        panelTaskId.add(panelChangeDayButtons);
+
+        buttonHelp.setText("Help/About");
+        buttonHelp.setToolTipText("");
+        buttonHelp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonHelpActionPerformed(evt);
+            }
+        });
+        panelTaskId.add(buttonHelp);
+
+        panelTop.add(panelTaskId);
+
+        panelEnterTask.setLayout(new java.awt.BorderLayout(10, 0));
 
         comboBoxTaskId.setEditable(true);
+        comboBoxTaskId.setToolTipText("TaskId input field");
+        panelEnterTask.add(comboBoxTaskId, java.awt.BorderLayout.CENTER);
+
+        labelTaskId.setText("TaskId");
+        panelEnterTask.add(labelTaskId, java.awt.BorderLayout.WEST);
+
+        panelTop.add(panelEnterTask);
+
+        panelButtons.setLayout(new java.awt.GridLayout(1, 4, 10, 10));
 
         buttonAddTrack.setBackground(new java.awt.Color(51, 255, 51));
         buttonAddTrack.setText("Add track");
@@ -165,53 +202,21 @@ public class MainForm extends javax.swing.JFrame {
         });
         panelButtons.add(buttonReport);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(scrollPaneTracks)
-                    .addComponent(panelButtons, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 362, Short.MAX_VALUE)
-                    .addComponent(comboBoxTaskId, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(comboBoxDescription, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(labelDescription)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(labelTaskId)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(labelCurrentDay, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(buttonPrevDay)
-                        .addGap(18, 18, 18)
-                        .addComponent(buttonNextDay)))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                .addGap(17, 17, 17)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labelCurrentDay, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(labelTaskId)
-                            .addComponent(buttonPrevDay)
-                            .addComponent(buttonNextDay))
-                        .addGap(10, 10, 10)
-                        .addComponent(comboBoxTaskId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
-                .addComponent(labelDescription)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(comboBoxDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(panelButtons, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(scrollPaneTracks, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
+        panelTop.add(panelButtons);
+
+        getContentPane().add(panelTop, java.awt.BorderLayout.NORTH);
+
+        listTracks.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        listTracks.setComponentPopupMenu(popupMenuTracks);
+        listTracks.setMaximumSize(new java.awt.Dimension(380, 0));
+        listTracks.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                listTracksMousePressed(evt);
+            }
+        });
+        scrollPaneTracks.setViewportView(listTracks);
+
+        getContentPane().add(scrollPaneTracks, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -256,6 +261,10 @@ public class MainForm extends javax.swing.JFrame {
         writeTrack(evt.getClickCount());
     }//GEN-LAST:event_listTracksMousePressed
 
+    private void buttonHelpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonHelpActionPerformed
+         viewHelpAboutForm();
+    }//GEN-LAST:event_buttonHelpActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -289,19 +298,22 @@ public class MainForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonAddTrack;
     private javax.swing.JButton buttonEndDay;
+    private javax.swing.JButton buttonHelp;
     private javax.swing.JButton buttonNextDay;
     private javax.swing.JButton buttonPause;
     private javax.swing.JButton buttonPrevDay;
     private javax.swing.JButton buttonReport;
-    private javax.swing.JComboBox<String> comboBoxDescription;
     private javax.swing.JComboBox<String> comboBoxTaskId;
     private javax.swing.JLabel labelCurrentDay;
-    private javax.swing.JLabel labelDescription;
     private javax.swing.JLabel labelTaskId;
     private javax.swing.JList<String> listTracks;
     private javax.swing.JMenuItem menuItemDelete;
     private javax.swing.JMenuItem menuItemEdit;
     private javax.swing.JPanel panelButtons;
+    private javax.swing.JPanel panelChangeDayButtons;
+    private javax.swing.JPanel panelEnterTask;
+    private javax.swing.JPanel panelTaskId;
+    private javax.swing.JPanel panelTop;
     private javax.swing.JPopupMenu popupMenuTracks;
     private javax.swing.JScrollPane scrollPaneTracks;
     // End of variables declaration//GEN-END:variables
@@ -359,7 +371,6 @@ public class MainForm extends javax.swing.JFrame {
                 && selectedIndex < tracks.size()) {
             TrackItem oldTrack = tracks.get(selectedIndex);
             TrackItem newTrack = new TrackItem(oldTrack.getTrackId(), new Date());
-            newTrack.setDescription(oldTrack.getDescription());
             write(newTrack);
         }
     }
@@ -386,7 +397,7 @@ public class MainForm extends javax.swing.JFrame {
         for (int i = 1; i < tracks.size(); ++i) {
             TrackItem prev = tracks.get(i - 1);
             TrackItem curr = tracks.get(i);
-            String key = (prev.getTrackId() + prev.getDescription()).replace(" ", "");
+            String key = prev.getTrackId().replace(" ", "");
             ReportItem value = tRep.get(key);
             long diff = curr.getDate().getTime() - prev.getDate().getTime();
             if (value == null) {
@@ -401,9 +412,8 @@ public class MainForm extends javax.swing.JFrame {
             long timeDiff = reportItem.getTimeDiff();
             String date = format.format(toDate(timeDiff));
             TrackItem trackItem = reportItem.getTrackItem();
-            String description = trackItem.getDescription() == null ? "" : trackItem.getDescription();
             if (!Constants.PAUSE.equals(trackItem.getTrackId())) {
-                repData.add(Arrays.asList(trackItem.getTrackId(), description, date));
+                repData.add(Arrays.asList(trackItem.getTrackId(), date));
             }
         }
         ReportForm reportForm = new ReportForm(this, true);
@@ -451,7 +461,6 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     private void initSettings() {
-        fillDescriptionProperties();
         if (currentDay.isEqual(today)) {
             buttonAddTrack.setEnabled(true);
             buttonEndDay.setEnabled(true);
@@ -506,10 +515,6 @@ public class MainForm extends javax.swing.JFrame {
                 && !taskId.equalsIgnoreCase(Constants.PAUSE)
         ) {
             TrackItem trackItem = new TrackItem(taskId, new Date());
-            String desc = String.valueOf(comboBoxDescription.getSelectedItem());
-            if (desc != null && !desc.isEmpty()) {
-                trackItem.setDescription(desc);
-            }
             write(trackItem);
         }
     }
@@ -559,30 +564,8 @@ public class MainForm extends javax.swing.JFrame {
         }
     }
 
-    private void fillDescriptionProperties() {
-        try (InputStream inputStream = getClass().getResourceAsStream("/activities.properties")) {
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            Locale locale = Locale.getDefault();
-            String country = locale.getCountry();
-            String en = "en";
-            List<String> propertiesList = new ArrayList<>();
-            for (Activity activity : Activity.values()) {
-                String name = activity.name();
-                String key = name + "." + country;
-                String keyLowercase = key.toLowerCase(Locale.ENGLISH);
-                String property = properties.getProperty(keyLowercase);
-                if (property == null || property.trim().isEmpty()) {
-                    String keyEn = name + "." + en;
-                    String keyLowercaseEn = keyEn.toLowerCase(Locale.ENGLISH);
-                    String propertyEn = properties.getProperty(keyLowercaseEn);
-                    propertiesList.add(propertyEn);
-                }
-                propertiesList.add(property);
-            }
-            comboBoxDescription.setModel(new DefaultComboBoxModel<>(propertiesList.toArray(new String[0])));
-        } catch (IOException ex) {
-            ex.printStackTrace(System.err);
-        }
+    private void viewHelpAboutForm() {
+        JOptionPane.showMessageDialog(this, HELP_ABOUT_TEXT, "About", JOptionPane.INFORMATION_MESSAGE);
     }
+
 }

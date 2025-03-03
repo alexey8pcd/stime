@@ -17,6 +17,8 @@ public class EditTrackItemForm extends javax.swing.JDialog {
     
     /**
      * Creates new form EditTrackItemForm
+     * @param parent
+     * @param modal
      */
     public EditTrackItemForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -32,35 +34,31 @@ public class EditTrackItemForm extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        labelDescription1 = new javax.swing.JLabel();
+        panelMain = new javax.swing.JPanel();
         labelTaskId = new javax.swing.JLabel();
         textFieldTaskId = new javax.swing.JTextField();
-        labelDescription = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        textAreaDescription = new javax.swing.JTextArea();
+        labelTime = new javax.swing.JLabel();
         textFieldTime = new javax.swing.JTextField();
-        buttonCancel = new javax.swing.JButton();
+        panelButtons = new javax.swing.JPanel();
         buttonOk = new javax.swing.JButton();
+        buttonCancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(300, 250));
 
-        labelDescription1.setText("Time");
+        panelMain.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 10, 2, 10));
+        panelMain.setLayout(new java.awt.GridLayout(5, 1, 10, 10));
 
         labelTaskId.setText("TaskId");
+        panelMain.add(labelTaskId);
+        panelMain.add(textFieldTaskId);
 
-        labelDescription.setText("Description");
+        labelTime.setText("Time");
+        panelMain.add(labelTime);
+        panelMain.add(textFieldTime);
 
-        textAreaDescription.setColumns(20);
-        textAreaDescription.setLineWrap(true);
-        textAreaDescription.setRows(2);
-        jScrollPane1.setViewportView(textAreaDescription);
-
-        buttonCancel.setText("Cancel");
-        buttonCancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonCancelActionPerformed(evt);
-            }
-        });
+        panelButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 0, 2, 0));
+        panelButtons.setLayout(new java.awt.GridLayout(1, 2, 10, 10));
 
         buttonOk.setText("OK");
         buttonOk.addActionListener(new java.awt.event.ActionListener() {
@@ -68,56 +66,19 @@ public class EditTrackItemForm extends javax.swing.JDialog {
                 buttonOkActionPerformed(evt);
             }
         });
+        panelButtons.add(buttonOk);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(labelDescription1)
-                            .addComponent(textFieldTime, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(textFieldTaskId)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(labelTaskId)
-                                .addGap(0, 94, Short.MAX_VALUE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(labelDescription)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(buttonOk)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(buttonCancel)))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(labelDescription1)
-                    .addComponent(labelTaskId))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(textFieldTaskId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(textFieldTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(13, 13, 13)
-                .addComponent(labelDescription)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(buttonCancel)
-                    .addComponent(buttonOk))
-                .addContainerGap())
-        );
+        buttonCancel.setText("Cancel");
+        buttonCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonCancelActionPerformed(evt);
+            }
+        });
+        panelButtons.add(buttonCancel);
+
+        panelMain.add(panelButtons);
+
+        getContentPane().add(panelMain, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -138,9 +99,7 @@ public class EditTrackItemForm extends javax.swing.JDialog {
                 Date date = simpleDateFormat.parse(text);
                 if ((prevDate == null || date.after(prevDate))
                         && (nextDate == null || date.before(nextDate))) {
-                    String description = textAreaDescription.getText();
                     trackItem = new TrackItem(trackId, date);
-                    trackItem.setDescription(description);
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "Time value intersects with existing intervals");
@@ -160,11 +119,10 @@ public class EditTrackItemForm extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonCancel;
     private javax.swing.JButton buttonOk;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JLabel labelDescription;
-    private javax.swing.JLabel labelDescription1;
     private javax.swing.JLabel labelTaskId;
-    private javax.swing.JTextArea textAreaDescription;
+    private javax.swing.JLabel labelTime;
+    private javax.swing.JPanel panelButtons;
+    private javax.swing.JPanel panelMain;
     private javax.swing.JTextField textFieldTaskId;
     private javax.swing.JTextField textFieldTime;
     // End of variables declaration//GEN-END:variables
@@ -174,10 +132,8 @@ public class EditTrackItemForm extends javax.swing.JDialog {
         this.nextDate = nextDate;
         Date date = selectedTrack.getDate();
         String trackId = selectedTrack.getTrackId();
-        String description = selectedTrack.getDescription();
         textFieldTime.setText(new SimpleDateFormat(Constants.TIME_FORMAT).format(date));
         textFieldTaskId.setText(trackId);
-        textAreaDescription.setText(description);
     }
 
     TrackItem getTrackItem() {
