@@ -3,6 +3,9 @@ package ru.alejov.util.stime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 /**
  *
@@ -14,6 +17,8 @@ public class ReportForm extends javax.swing.JDialog {
 
     /**
      * Creates new form ReportForm
+     * @param parent
+     * @param modal
      */
     public ReportForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -26,7 +31,7 @@ public class ReportForm extends javax.swing.JDialog {
 
             @Override
             public int getColumnCount() {
-                return 3;
+                return 2;
             }
 
             @Override
@@ -35,9 +40,20 @@ public class ReportForm extends javax.swing.JDialog {
             }
         };
         tableReport.setModel(abstractTableModel);
-        tableReport.getTableHeader().getColumnModel().getColumn(0).setHeaderValue("Task");
-        tableReport.getTableHeader().getColumnModel().getColumn(1).setHeaderValue("Description");
-        tableReport.getTableHeader().getColumnModel().getColumn(2).setHeaderValue("Time");
+        JTableHeader tableHeader = tableReport.getTableHeader();
+        TableColumnModel columnModel = tableHeader.getColumnModel();
+        TableColumn column0 = columnModel.getColumn(0);
+        
+        int column0Width = tableHeader.getWidth() * 75 / 100;
+        column0.setHeaderValue("TaskId");
+        column0.setPreferredWidth(column0Width);
+        column0.setWidth(column0Width);
+        
+        int column1Width = tableHeader.getWidth() * 25 / 100;
+        TableColumn column1 = columnModel.getColumn(1);
+        column1.setHeaderValue("Time");
+        column1.setPreferredWidth(column1Width);
+        column1.setWidth(column1Width);
     }
 
     void setRep(List<List<String>> data) {
@@ -57,21 +73,21 @@ public class ReportForm extends javax.swing.JDialog {
         tableReport = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(800, 400));
+        setPreferredSize(new java.awt.Dimension(600, 400));
 
         tableReport.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "Track", "Description", "Time"
+                "Track", "Time"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false
             };
 
             public Class getColumnClass(int columnIndex) {
