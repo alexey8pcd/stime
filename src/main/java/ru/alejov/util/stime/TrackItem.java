@@ -1,8 +1,9 @@
 package ru.alejov.util.stime;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -14,28 +15,28 @@ class TrackItem {
     private static final String SP = "\t`";
 
     private String trackId;
-    private final Date date;
+    private final LocalDateTime date;
 
-    TrackItem(String trackId, Date date) {
+    TrackItem(String trackId, LocalDateTime date) {
         this.trackId = trackId;
         this.date = date;
     }
 
-    TrackItem(String csvRepresentation) throws ParseException {
+    TrackItem(LocalDate currentDay, String csvRepresentation) throws ParseException {
         String[] split = csvRepresentation.split(Pattern.quote(SP));
-        date = new SimpleDateFormat(Constants.TIME_FORMAT).parse(split[0]);
+        LocalTime localTime = LocalTime.parse(split[0], Constants.TIME_FORMATTER);
+        date = LocalDateTime.of(currentDay, localTime);
         trackId = split[1];
     }
 
     @Override
     public String toString() {
         String spaces = "  ";
-        String ret = new SimpleDateFormat(Constants.TIME_FORMAT).format(date) + spaces + trackId;
-        return ret;
+        return date.format(Constants.TIME_FORMATTER) + spaces + trackId;
     }
 
     public String asCsvString() {
-        String ret = new SimpleDateFormat(Constants.TIME_FORMAT).format(date) + SP + trackId;
+        String ret = date.format(Constants.TIME_FORMATTER) + SP + trackId;
         ret += SP;
         return ret;
     }
@@ -48,7 +49,7 @@ class TrackItem {
         this.trackId = trackId;
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
@@ -76,10 +77,7 @@ class TrackItem {
         if (!Objects.equals(this.trackId, other.trackId)) {
             return false;
         }
-        if (!Objects.equals(this.date, other.date)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.date, other.date);
     }    
 
 }

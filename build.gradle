@@ -7,7 +7,7 @@ compileJava.targetCompatibility = JavaVersion.VERSION_1_8;
 jar {
     manifest {
         attributes 'Implementation-Title': 'Simple Time Tracker',
-                'Implementation-Version': '2025.1',
+                'Implementation-Version': '2025.1.1',
                 'Main-Class': 'ru.alejov.util.stime.MainForm'
     }
 }

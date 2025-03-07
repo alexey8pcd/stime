@@ -1,10 +1,11 @@
 package ru.alejov.util.stime;
 
-import java.awt.HeadlessException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import javax.swing.JOptionPane;
+import java.awt.HeadlessException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 
 /**
  * @author Ovcharov Alexey
@@ -12,9 +13,10 @@ import javax.swing.JOptionPane;
 public class EditTrackItemForm extends javax.swing.JDialog {
 
     private TrackItem trackItem;
-    private Date prevDate;
-    private Date nextDate;
-    
+    private LocalDateTime prevDate;
+    private LocalDateTime nextDate;
+    private LocalDate currentDate;
+
     /**
      * Creates new form EditTrackItemForm
      * @param parent
@@ -92,20 +94,19 @@ public class EditTrackItemForm extends javax.swing.JDialog {
         try {
             String trackId = textFieldTaskId.getText();
             if (!trackId.isEmpty() && !Constants.BEGIN_DAY.equals(trackId)
-                    && !Constants.PAUSE.equals(trackId)
-                    && !Constants.END_DAY.equals(trackId)) {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.TIME_FORMAT);
-                simpleDateFormat.setLenient(false);
-                Date date = simpleDateFormat.parse(text);
-                if ((prevDate == null || date.after(prevDate))
-                        && (nextDate == null || date.before(nextDate))) {
+                && !Constants.PAUSE.equals(trackId)
+                && !Constants.END_DAY.equals(trackId)) {
+                LocalTime localTime = LocalTime.parse(text, Constants.TIME_FORMATTER);
+                LocalDateTime date = LocalDateTime.of(currentDate, localTime);
+                if ((prevDate == null || date.isAfter(prevDate))
+                    && (nextDate == null || date.isBefore(nextDate))) {
                     trackItem = new TrackItem(trackId, date);
                     dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "Time value intersects with existing intervals");
                 }
             }
-        } catch (ParseException ex) {
+        } catch (DateTimeParseException ex) {
             JOptionPane.showMessageDialog(this, "Invalid time: " + text);
         }
     }
@@ -127,12 +128,13 @@ public class EditTrackItemForm extends javax.swing.JDialog {
     private javax.swing.JTextField textFieldTime;
     // End of variables declaration//GEN-END:variables
 
-    void setTrack(TrackItem selectedTrack, Date prevDate, Date nextDate) {
+    void setTrack(TrackItem selectedTrack, LocalDateTime prevDate, LocalDateTime nextDate) {
         this.prevDate = prevDate;
         this.nextDate = nextDate;
-        Date date = selectedTrack.getDate();
+        LocalDateTime trackDate = selectedTrack.getDate();
+        this.currentDate = trackDate.toLocalDate();
         String trackId = selectedTrack.getTrackId();
-        textFieldTime.setText(new SimpleDateFormat(Constants.TIME_FORMAT).format(date));
+        textFieldTime.setText(Constants.TIME_FORMATTER.format(trackDate));
         textFieldTaskId.setText(trackId);
     }
 

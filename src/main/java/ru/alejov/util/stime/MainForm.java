@@ -7,8 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.*;
@@ -32,7 +34,7 @@ public class MainForm extends javax.swing.JFrame {
             + "the 'sTimeTracks' subfolder. Each day - a separate file.\n"
             + "\n"
             + "Author: Alexey Ovcharov, e-mail: alexey8rus@mail.ru";
-    
+
     private final transient List<TrackItem> tracks = new CopyOnWriteArrayList<>();
     private final LocalDate today = LocalDate.now();
     private final Set<String> lastTasks = new TreeSet<>();
@@ -268,7 +270,7 @@ public class MainForm extends javax.swing.JFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -360,7 +362,7 @@ public class MainForm extends javax.swing.JFrame {
         if (!tracks.isEmpty()) {
             last = tracks.get(tracks.size() - 1);
         } else {
-            last = new TrackItem(Constants.BEGIN_DAY, new Date());
+            last = new TrackItem(Constants.BEGIN_DAY, LocalDateTime.now());
         }
         return last;
     }
@@ -370,20 +372,16 @@ public class MainForm extends javax.swing.JFrame {
         if (!tracks.isEmpty() && clickCount == 2 && selectedIndex >= 0
                 && selectedIndex < tracks.size()) {
             TrackItem oldTrack = tracks.get(selectedIndex);
-            TrackItem newTrack = new TrackItem(oldTrack.getTrackId(), new Date());
+            TrackItem newTrack = new TrackItem(oldTrack.getTrackId(), LocalDateTime.now());
             write(newTrack);
         }
     }
 
-    private static Date toDate(long diffInMillis) {
+    private static LocalTime toDate(long diffInMillis) {
         int seconds = (int) TimeUnit.MILLISECONDS.toSeconds(diffInMillis) % 60;
         int minutes = (int) TimeUnit.MILLISECONDS.toMinutes(diffInMillis) % 60;
         int hours = (int) TimeUnit.MILLISECONDS.toHours(diffInMillis);
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, hours);
-        calendar.set(Calendar.MINUTE, minutes);
-        calendar.set(Calendar.SECOND, seconds);
-        return calendar.getTime();
+        return LocalTime.of(hours, minutes, seconds);
     }
 
     private void report() {
@@ -399,18 +397,18 @@ public class MainForm extends javax.swing.JFrame {
             TrackItem curr = tracks.get(i);
             String key = prev.getTrackId().replace(" ", "");
             ReportItem value = tRep.get(key);
-            long diff = curr.getDate().getTime() - prev.getDate().getTime();
+            long diff = Duration.between(prev.getDate(), curr.getDate()).toMillis();
             if (value == null) {
                 tRep.put(key, new ReportItem(prev, diff));
             } else {
                 value.increase(diff);
             }
         }
-        SimpleDateFormat format = new SimpleDateFormat(Constants.REPORT_TIME_FORMAT);
         List<List<String>> repData = new ArrayList<>();
         for (ReportItem reportItem : tRep.values()) {
             long timeDiff = reportItem.getTimeDiff();
-            String date = format.format(toDate(timeDiff));
+            LocalTime localTime = toDate(timeDiff);
+            String date = Constants.REPORT_FORMATTER.format(localTime);
             TrackItem trackItem = reportItem.getTrackItem();
             if (!Constants.PAUSE.equals(trackItem.getTrackId())) {
                 repData.add(Arrays.asList(trackItem.getTrackId(), date));
@@ -427,7 +425,7 @@ public class MainForm extends javax.swing.JFrame {
 
     private void endDay() {
         tracks.removeIf(trackItem -> Constants.END_DAY.equals(trackItem.getTrackId()));
-        TrackItem newTrack = new TrackItem(Constants.END_DAY, new Date());
+        TrackItem newTrack = new TrackItem(Constants.END_DAY, LocalDateTime.now());
         tracks.add(newTrack);
         persist();
         listTracks.updateUI();
@@ -452,7 +450,7 @@ public class MainForm extends javax.swing.JFrame {
     }
 
     private void pause() {
-        TrackItem pauseTrack = new TrackItem(Constants.PAUSE, new Date());
+        TrackItem pauseTrack = new TrackItem(Constants.PAUSE, LocalDateTime.now());
         write(pauseTrack);
     }
 
@@ -493,7 +491,7 @@ public class MainForm extends javax.swing.JFrame {
                 List<String> allLines = Files.readAllLines(path, StandardCharsets.UTF_8);
                 tracks.clear();
                 for (String string : allLines) {
-                    TrackItem trackItem = new TrackItem(string);
+                    TrackItem trackItem = new TrackItem(currentDay, string);
                     tracks.add(trackItem);
                     addToLastTask(trackItem);
                 }
@@ -514,7 +512,7 @@ public class MainForm extends javax.swing.JFrame {
                 && !taskId.equalsIgnoreCase(Constants.END_DAY)
                 && !taskId.equalsIgnoreCase(Constants.PAUSE)
         ) {
-            TrackItem trackItem = new TrackItem(taskId, new Date());
+            TrackItem trackItem = new TrackItem(taskId, LocalDateTime.now());
             write(trackItem);
         }
     }
@@ -523,12 +521,12 @@ public class MainForm extends javax.swing.JFrame {
         int selectedIndex = listTracks.getSelectedIndex();
         if (selectedIndex >= 0 && selectedIndex < tracks.size()) {
             TrackItem selectedTrack = tracks.get(selectedIndex);
-            Date prevDate = null;
+            LocalDateTime prevDate = null;
             if (selectedIndex > 0) {
                 TrackItem prevTrack = tracks.get(selectedIndex - 1);
                 prevDate = prevTrack.getDate();
             }
-            Date nextDate = null;
+            LocalDateTime nextDate = null;
             if (selectedIndex < tracks.size() - 1) {
                 TrackItem nextTrack = tracks.get(selectedIndex + 1);
                 nextDate = nextTrack.getDate();
